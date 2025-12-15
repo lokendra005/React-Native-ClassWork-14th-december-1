@@ -1,0 +1,14 @@
+E-Commerce Grocery Delivery Platform
+
+1. Authentication System - email , password , Google Login
+2. Onboarding Screens - login , sign up
+3. Forgot Password - OTP verification
+
+4. Home Page - Browse and Search different products
+5. Add Things to Cart
+6. User Presistance - Redux , Zustand
+7. Admin Side
+8. Payment Gateway
+9 . Rate Limiting , React Query , alot other optimzations 
+
+10 . App store or playstore

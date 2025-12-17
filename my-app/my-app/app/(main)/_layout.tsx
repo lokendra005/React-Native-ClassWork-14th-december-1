@@ -30,6 +30,14 @@ export default function MainLayout() {
         tabBarIcon: ({ color, size }) => <Ionicons name="receipt" color={color} size={size} />,
       }}/>
 
+      <Tabs.Screen 
+        name="favorites"
+        options={{
+          title: "Favorites",
+          tabBarIcon: ({ color, size }) => <Ionicons name="heart" color={color} size={size} />,
+        }}
+      />
+
       <Tabs.Screen name="profile"
        options={{
         title: "Profile",

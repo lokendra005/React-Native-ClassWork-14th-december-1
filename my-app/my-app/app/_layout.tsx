@@ -1,5 +1,6 @@
 import CartLoader from "@/components/CartLoader";
 import OrdersLoader from "@/components/OrdersLoader";
+import FavoritesLoader from "@/components/FavoritesLoader";
 import NotificationSetup from "@/components/NotificationSetup";
 import { store } from "../store/store";
 import { Stack } from "expo-router";
@@ -17,6 +18,7 @@ export default function RootLayout() {
       <Provider store={store}>
           <CartLoader/>
           <OrdersLoader/>
+          <FavoritesLoader/>
           <NotificationSetup/>
          <Stack screenOptions={{headerShown:false}} />
       </Provider>

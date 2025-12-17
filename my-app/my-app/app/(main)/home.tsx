@@ -16,6 +16,7 @@ import LocationPicker from "../../components/LocationPicker";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useDispatch } from "react-redux";
 import { addToCart } from "../../store/cartSlice";
+import FavoriteButton from "../../components/FavoriteButton";
 
 
 
@@ -216,8 +217,21 @@ const home = () => {
                 className="bg-white rounded-xl p-3 mr-3 shadow-sm border border-gray-100"
                 style={{ width: 150 }}
               >
-                <View className="w-full h-24 bg-gray-50 rounded-lg items-center justify-center mb-2">
+                <View className="w-full h-24 bg-gray-50 rounded-lg items-center justify-center mb-2 relative">
                   <Text className="text-5xl">{item.image}</Text>
+                  {/* Favorite Button */}
+                  <View className="absolute top-1 right-1">
+                    <FavoriteButton 
+                      product={{
+                        id: item.id,
+                        name: item.name,
+                        image: item.image,
+                        category: item.category,
+                        price: item.price,
+                      }}
+                      size={20}
+                    />
+                  </View>
                 </View>
 
                 <Text

@@ -7,11 +7,12 @@ import {
   TextInput,
   FlatList,
   Alert,
+  ActivityIndicator,
 } from "react-native";
 import React, { useState, useEffect } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
-import { authApi } from "../../utils/api.js";
+import { authApi, productsApi } from "../../utils/api.js";
 import LocationPicker from "../../components/LocationPicker";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useDispatch } from "react-redux";
@@ -24,14 +25,36 @@ const home = () => {
   const router = useRouter();
   const [locationPickerVisible, setLocationPickerVisible] = useState(false);
   const [locationName, setLocationName] = useState("Home");
-
+  
+  // Products state
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   // initialize dispatcher
   const dispatch = useDispatch()
 
   useEffect(() => {
     loadSavedLocation();
+    fetchProducts();
   }, []);
+
+  const fetchProducts = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const response = await productsApi.getProducts();
+      if (response.success) {
+        setProducts(response.data);
+      } else {
+        setError('Failed to fetch products');
+      }
+    } catch (err) {
+      setError(err.message || 'Error fetching products');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const loadSavedLocation = async () => {
     try {
@@ -70,26 +93,14 @@ const home = () => {
       },
     ]);
   };
-  // Minimal placeholder data (UI only)
+  // Categories data
   const categories = [
     { id: 1, name: "Fruits", icon: "🍎", color: "bg-red-100" },
     { id: 2, name: "Vegetables", icon: "🥬", color: "bg-green-100" },
     { id: 3, name: "Dairy", icon: "🥛", color: "bg-blue-100" },
-    { id: 4, name: "Electronics", icon: "🥛", color: "bg-blue-100" },
-    { id: 5, name: "Clothes", icon: "🥛", color: "bg-blue-100" },
-    { id: 6, name: "Snacks", icon: "🥛", color: "bg-blue-100" },
-  ];
-
-  const products = [
-    {
-      id: 1,
-      name: "Tomatoes",
-      price: "₹49",
-      image: "🍅",
-      category: "Vegetables",
-    },
-    { id: 2, name: "Bananas", price: "₹39", image: "🍌", category: "Fruits" },
-    { id: 3, name: "Milk", price: "₹65", image: "🥛", category: "Dairy" },
+    { id: 4, name: "Electronics", icon: "📱", color: "bg-purple-100" },
+    { id: 5, name: "Clothes", icon: "👕", color: "bg-pink-100" },
+    { id: 6, name: "Snacks", icon: "🍿", color: "bg-yellow-100" },
   ];
 
   return (
@@ -207,65 +218,87 @@ const home = () => {
             </TouchableOpacity>
           </View>
 
-          <FlatList
-            data={products}
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            keyExtractor={(item) => item.id.toString()}
-            renderItem={({ item }) => (
-              <View
-                className="bg-white rounded-xl p-3 mr-3 shadow-sm border border-gray-100"
-                style={{ width: 150 }}
+          {loading ? (
+            <View className="h-40 items-center justify-center">
+              <ActivityIndicator size="large" color="#059669" />
+              <Text className="text-gray-500 mt-2">Loading products...</Text>
+            </View>
+          ) : error ? (
+            <View className="h-40 items-center justify-center">
+              <Text className="text-red-500 text-center">{error}</Text>
+              <TouchableOpacity 
+                className="mt-2 bg-emerald-600 px-4 py-2 rounded-lg"
+                onPress={fetchProducts}
               >
-                <View className="w-full h-24 bg-gray-50 rounded-lg items-center justify-center mb-2 relative">
-                  <Text className="text-5xl">{item.image}</Text>
-                  {/* Favorite Button */}
-                  <View className="absolute top-1 right-1">
-                    <FavoriteButton 
-                      product={{
-                        id: item.id,
+                <Text className="text-white font-semibold">Retry</Text>
+              </TouchableOpacity>
+            </View>
+          ) : (
+            <FlatList
+              data={products}
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              keyExtractor={(item) => item._id}
+              renderItem={({ item }) => (
+                <View
+                  className="bg-white rounded-xl p-3 mr-3 shadow-sm border border-gray-100"
+                  style={{ width: 150 }}
+                >
+                  <View className="w-full h-24 bg-gray-50 rounded-lg items-center justify-center mb-2 relative">
+                    <Text className="text-5xl">{item.image}</Text>
+                    {/* Favorite Button */}
+                    <View className="absolute top-1 right-1">
+                      <FavoriteButton 
+                        product={{
+                          id: item._id,
+                          name: item.name,
+                          image: item.image,
+                          category: item.category,
+                          price: `₹${item.price}`,
+                        }}
+                        size={20}
+                      />
+                    </View>
+                  </View>
+
+                  <Text
+                    className="text-sm font-semibold text-gray-800"
+                    numberOfLines={1}
+                  >
+                    {item.name}
+                  </Text>
+                  <Text className="text-xs text-gray-500">{item.category}</Text>
+
+                  <View className="flex-row items-center justify-between mt-2">
+                    <Text className="text-lg font-bold text-emerald-600">
+                      ₹{item.price}
+                    </Text>
+                    <TouchableOpacity className="bg-emerald-600 px-3 py-1 rounded-lg"
+                    onPress={()=>{
+                      dispatch(addToCart({
+                        id: item._id,
                         name: item.name,
                         image: item.image,
                         category: item.category,
-                        price: item.price,
-                      }}
-                      size={20}
-                    />
+                        price: `₹${item.price}`
+                      }))
+                    }}>
+                      <Text className="text-white text-xs font-semibold">
+                        Add
+                      </Text>
+                    </TouchableOpacity>
                   </View>
                 </View>
-
-                <Text
-                  className="text-sm font-semibold text-gray-800"
-                  numberOfLines={1}
-                >
-                  {item.name}
-                </Text>
-                <Text className="text-xs text-gray-500">{item.category}</Text>
-
-                <View className="flex-row items-center justify-between mt-2">
-                  <Text className="text-lg font-bold text-emerald-600">
-                    {item.price}
-                  </Text>
-                  <TouchableOpacity className="bg-emerald-600 px-3 py-1 rounded-lg"
-                  onPress={()=>{
-                    dispatch(addToCart({
-                      id:item.id,
-                      name:item.name,
-                      image: item.image,
-                      category: item.category,
-                      price : item.price
-                    }))
-                  }}>
-                    <Text className="text-white text-xs font-semibold">
-                      Add
-                    </Text>
-                  </TouchableOpacity>
+              )}
+              scrollEnabled={true}
+              nestedScrollEnabled={true}
+              ListEmptyComponent={
+                <View className="h-40 items-center justify-center">
+                  <Text className="text-gray-500">No products available</Text>
                 </View>
-              </View>
-            )}
-            scrollEnabled={true}
-            nestedScrollEnabled={true}
-          />
+              }
+            />
+          )}
         </View>
       </ScrollView>
 

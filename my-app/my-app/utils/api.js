@@ -145,6 +145,29 @@ export const authApi = {
   },
 };
 
+// Products API
+export const productsApi = {
+  // Get all products (optional filter by category or search query)
+  getProducts: async (category = null, q = null) => {
+    let endpoint = '/api/products';
+    const params = [];
+    if (category) params.push(`category=${encodeURIComponent(category)}`);
+    if (q) params.push(`q=${encodeURIComponent(q)}`);
+    if (params.length > 0) endpoint += `?${params.join('&')}`;
+    return apiRequest(endpoint, 'GET');
+  },
+
+  // Get single product by ID
+  getProduct: async (id) => {
+    return apiRequest(`/api/products/${id}`, 'GET');
+  },
+
+  // Create a product
+  createProduct: async (productData) => {
+    return apiRequest('/api/products', 'POST', productData);
+  },
+};
+
 // Payment API
 export const paymentApi = {
   // Create payment intent

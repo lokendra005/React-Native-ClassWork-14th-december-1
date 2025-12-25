@@ -6,6 +6,7 @@ import cors from 'cors';
 import connectDB from './config/dbConfig.js';
 import authRoutes from './routes/auth.routes.js';
 import paymentRoutes from './routes/payment.routes.js';
+import productsRoutes from './routes/products.routes.js';
 
 // Connect to database
 connectDB();
@@ -24,6 +25,7 @@ app.use(express.urlencoded({ extended: true }));
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/payment', paymentRoutes);
+app.use('/api/products', productsRoutes);
 
 // Health check route
 app.get('/api/health', (req, res) => {
